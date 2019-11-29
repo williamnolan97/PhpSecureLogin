@@ -7,8 +7,12 @@
     $password = $_POST['password'];
     $newSalt = generateSalt();
     $hash = md5($password . $newSalt);
-    echo 'um hello';
-    insertUser($username, $hash, $newSalt, $conn);
+    if(!checkUserExists($username, $conn)){
+      echo "Sorry - Please choose a different username. <a href='/src/signUp.php'>Back</a>";
+      exit();
+    } else {
+      insertUser($username, $hash, $newSalt, $conn);
+    }
   }
 
 ?>

@@ -41,13 +41,23 @@ function insertUser($username, $password, $salt, $conn){
   $sql = "INSERT INTO users (id, username, password, salt)
           VALUES (NULL, '$username', '$password', '$salt')";
   if($conn->query($sql)){
-    echo 'um hey';
-    echo "<div><h5> New user added
-                <input type='button' value='Login' onclick= 'window.location = \"login.php\" '> </h5></div>";
+    echo 'User added. <a href="/src/login.php">Login</a>';
     exit();
   } else {
-    echo 'um tf you think you are';
-    echo("Insert error: " . $conn -> error);
+    echo("User insert error: " . $conn -> error);
+  }
+}
+
+function checkUserExists($username, $conn){
+  $sql = "SELECT * FROM users WHERE username='$username'";
+  if($conn->query($sql)){
+    if($conn->affected_rows == 0){
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    echo("Query error: " . $conn -> error);
   }
 }
 
