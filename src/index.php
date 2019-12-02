@@ -1,10 +1,9 @@
 <?php
-
-  include('utils.php');
-
+  include("utils.php");
+  session_start();
+  
   createDb();
   createTable();
-
 ?>
 
 <!DOCTYPE html>
@@ -14,12 +13,8 @@
 		<title>Secure Application</title>
 	</head>
 	<body>
-		<div id="body">
-            <div id="main" align="center">
-                <h1>Welcome to my Secure App Login Assignment<br><br>
-                  Please <a href="/src/login.php">Login</a> or <a href="/src/signUp.php">Sign Up</a> to continue.
-                </h1>
-            </div>
-		</div>
+      <h1>Welcome to my Secure App Login Assignment<br><br>
+        Please <a href="/src/login.php">Login</a> or <a href="/src/signUp.php">Sign Up</a> to continue.
+      </h1>
 	</body>
 </html>
