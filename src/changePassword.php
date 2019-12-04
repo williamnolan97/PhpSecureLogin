@@ -8,7 +8,7 @@
 		<a href='/src/login.php'>Login</a>" ;
 		exit();
 	} else {
-		if(isset($_GET['submit'])) {    
+		if(isset($_GET['submit'])) {
         $username = $_SESSION['username'];
   			$old = $_GET['oldpassword'];
   			$new = $_GET['newpassword1'];
@@ -50,8 +50,7 @@
   							$_SESSION['username'] = null ;
   							session_unset();
   							session_destroy();
-  							echo "Password update successful!<br>
-  							<a href='/src/login.php'>Login</a>";
+  							header("location: /src/login.php");
   							exit();
   					}
   			}

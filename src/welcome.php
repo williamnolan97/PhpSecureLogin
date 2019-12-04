@@ -15,10 +15,12 @@
 		<title>Welcome</title>
 	</head>
 	<body>
-      <h1>Welcome, <?php echo $_SESSION['username']; ?>!<br><br>
-        <a href="/src/logout.php">Logout</a><br>
-        <a href="/src/changePassword.php">Change Password</a><br>
-        <img src="https://i.imgur.com/BkDkTxY.jpg">
-      </h1>
+      <h1>Welcome, <?php echo $_SESSION['username']; ?>!</h1>
+      <a href="/src/logout.php">Logout</a><br>
+      <a href="/src/changePassword.php">Change Password</a><br>
+      <h3>Hidden Pages</h3>
+      <a href="/src/pageOne.php">Page One</a><br>
+      <a href="/src/pageTwo.php">Page Two</a><br>
+      <img src="https://i.imgur.com/BkDkTxY.jpg">
 	</body>
 </html>

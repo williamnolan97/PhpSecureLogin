@@ -3,8 +3,7 @@
   include("utils.php");
   session_start();
 
-  if(ISSET($_SESSION['username']))
-	{
+  if(ISSET($_SESSION['username'])){
 		header("location: /src/welcome.php");
 		exit();
 	}
@@ -27,9 +26,6 @@
       insertUser($username, $hash, $newSalt, $conn);
     }
   }
-
-
-
 ?>
 
 <!DOCTYPE html>
