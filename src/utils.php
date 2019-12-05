@@ -6,7 +6,6 @@ function createDb(){
   if($conn->query($sql)){
     echo "Database created successfully";
   } else {
-    echo "Database already exists";
     echo("Database error: " . $conn -> error);
   }
 }
