@@ -3,8 +3,7 @@
   session_start();
 
   if(!ISSET($_SESSION['username'])){
-		echo "You must be logged in to view this page <br>
-		<a href='/src/login.php'>Login</a>" ;
+		header("location: /src/login.php");
 		exit();
 	}
 ?>

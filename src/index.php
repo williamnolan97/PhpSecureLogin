@@ -1,7 +1,8 @@
 <?php
   include("utils.php");
   session_start();
-  
+  $_SESSION['userIp'] = getUserIpAddr();
+  $_SESSION['userAgent'] = getBrowser();  
   createDb();
   createTable();
 ?>

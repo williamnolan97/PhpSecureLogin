@@ -14,7 +14,7 @@
     $hash = md5($password . $newSalt);
     $check = checkPasswordContains($password);
     if($check != "true"){
-      $_SESSION['errors'] = $check;
+      $_SESSION['signUpErrors'] = $check;
       header("location: /src/signUp.php");
       exit();
     }
@@ -36,7 +36,7 @@
 	</head>
 	<body>
     <h1>Sign Up</h1>
-    <?php if(ISSET($_SESSION['errors'])) { echo $_SESSION['errors']; } ?>
+    <?php if(ISSET($_SESSION['signUpErrors'])) { echo $_SESSION['signUpErrors']; } ?>
 		<form method="POST">
       <label>Username: </label><input type="text" name="username" autocomplete="off" autofocus required/>
       <br>

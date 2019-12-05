@@ -3,8 +3,7 @@
   session_start();
 
   if(!ISSET($_SESSION['username'])){
-		echo "You must be logged in to view this page <br>
-		<a href='/src/login.php'>Login</a>" ;
+		header("location: /src/login.php");
 		exit();
 	}
 ?>
@@ -21,6 +20,13 @@
       <h3>Hidden Pages</h3>
       <a href="/src/pageOne.php">Page One</a><br>
       <a href="/src/pageTwo.php">Page Two</a><br>
+      <?php
+        if(isset($_SESSION['admin'])){
+          if($_SESSION['admin']){
+            echo "<a href='/src/eventLog.php'>Event Log</a><br>";
+          }
+        }
+      ?>
       <img src="https://i.imgur.com/BkDkTxY.jpg">
 	</body>
 </html>

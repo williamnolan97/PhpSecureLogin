@@ -21,14 +21,35 @@ function createTable(){
   )";
   if($conn->query($sql)){
     echo "Table created successfully";
+    $salt = generateSalt();
+    $hashedPass = md5("SAD_2019" . $salt);
+    $sql = "SELECT id FROM users WHERE username = 'ADMIN'";
+    $result = $conn->query($sql);
+    $count = mysqli_num_rows($result);
+    if($count == 0) {
+      $sql = "INSERT INTO users (id, username, password, salt)
+              VALUES (NULL, 'ADMIN', '$hashedPass', '$salt')";
+      if($conn->query($sql)){
+        header("location: /src/index.php");
+      } else {
+        echo("ADMIN insert error: " . $conn -> error);
+      }
+    }
   } else {
-    echo "Table already exists";
-    echo("Table error: " . $conn -> error);
+    echo "Table error: " . $conn -> error;
   }
-  //Insert ADMIN User
-  $salt = generateSalt();
-  $hashedPass = md5("SAD_2019" . $salt);
-  insertUser("ADMIN", $hashedPass, $salt, $conn);  
+  $sql = "CREATE TABLE eventLog (
+              id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              ip VARCHAR(20) NOT NULL,
+              userAgent VARCHAR(64) NOT NULL,
+              username VARCHAR(30) NOT NULL,
+              successful BOOLEAN NOT NULL
+  )";
+  if($conn->query($sql)){
+    echo "Table created successfully";
+  } else {
+    echo "Table error: " . $conn -> error;
+  }
 }
 
 function generateSalt() {
@@ -166,6 +187,19 @@ function getBrowser(){
     }
 
    return $platform . $bname;
+}
+
+function insertLog($ip, $userAgent, $username, $successful, $conn){
+  $sql = "INSERT INTO eventLog (ip, userAgent, username, successful)
+          VALUES ('$ip', '$userAgent', '$username', '$successful')";
+  if($conn->query($sql) == FALSE){
+    echo("Error entering log: " . $conn -> error);
+  }
+  if($successful == TRUE){
+    header("location: /src/welcome.php");
+  } else {
+    header("location: /src/login.php");
+  }
 }
 
 ?>
