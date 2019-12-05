@@ -3,16 +3,25 @@
   include("utils.php");
 	session_start();
 
-  if(!ISSET($_SESSION['username'])){
-		echo "You must be logged in to view this page <br>
-		<a href='/src/login.php'>Login</a>" ;
-		exit();
+	if (!isset($_SESSION['loggedIn'])) {
+		session_destroy();
+    header('location: /src/login.php');
+    exit();
 	} else {
 		if(isset($_GET['submit'])) {
         $username = $_SESSION['username'];
   			$old = $_GET['oldpassword'];
   			$new = $_GET['newpassword1'];
   			$confirm = $_GET['newpassword2'];
+				$CSRF = $_GET['CSRF'];
+
+				if(!hash_equals($_SESSION['CSRF'], $CSRF)) {
+					echo $_SESSION['CSRF'];
+					echo $CSRF;
+					$_SESSION['loginErrors'] = "CSRF did not verify, please log in and try again.";
+					header('location: /src/login.php');
+					exit();
+				}
 
         $check = checkPasswordContains($new);
         if($check != "true"){
@@ -50,7 +59,7 @@
   							$_SESSION['username'] = null ;
   							session_unset();
   							session_destroy();
-  							header("location: /src/login.php");
+  							//header("location: /src/login.php");
   							exit();
   					}
   			}
@@ -74,6 +83,7 @@
         <br>
 				<label>Confirm New Password: </label><input type="password" name="newpassword2" autocomplete="off" required/>
         <br>
+				<input type="hidden" name="CSRF" value="<?php echo $_SESSION['CSRF'];?>"/>
         <input type="submit" name="submit" value="Change Password"/>
         <br/>
       </form>

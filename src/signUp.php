@@ -3,9 +3,9 @@
   include("utils.php");
   session_start();
 
-  if(ISSET($_SESSION['username'])){
-		header("location: /src/welcome.php");
-		exit();
+  if (isset($_SESSION['loggedIn'])) {
+    header('location: /src/welcome.php');
+    exit();
 	}
   if($_SERVER["REQUEST_METHOD"] == "POST"){
     $username = $_POST["username"];
@@ -19,10 +19,12 @@
       exit();
     }
     unset($_SESSION['errors']);
-    if(!checkUserExists($username, $conn)){
-      echo "Sorry. Please choose a different username. <a href='/src/signUp.php'>Back</a>";
+    if(!checkUserExists($username, $conn) OR !checkXSS($username)){
+      $_SESSION['signUpErrors'] = "Sorry. Please choose a different username.";
+      header("location: /src/signUp.php");
       exit();
     } else {
+      $username = sanitize($username);
       insertUser($username, $hash, $newSalt, $conn);
     }
   }

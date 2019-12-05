@@ -1,11 +1,23 @@
 <?php
   include("config.php");
+  include("utils.php");
   session_start();
 
-  if(!ISSET($_SESSION['username'])){
-		header("location: /src/login.php");
-		exit();
+  if (!isset($_SESSION['loggedIn'])) {
+		session_destroy();
+    header('location: /src/login.php');
+    exit();
 	}
+
+  if(!isset($_SESSION['lastActiveTime'])){
+    $_SESSION['lastActiveTime'] = time();
+    $_SESSION['loggedInTime'] = time();
+  } else {
+    checkActivity($_SESSION['lastActiveTime'], $_SESSION['loggedInTime']);
+  }
+  if(!isset($_SESSION['CSRF'])){
+    $_SESSION['CSRF'] = bin2hex(random_bytes(32));
+  }
 ?>
 <!DOCTYPE html>
 <html>

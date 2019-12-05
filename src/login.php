@@ -3,52 +3,66 @@
   include("utils.php");
   session_start();
 
-  if($_SERVER["REQUEST_METHOD"] == "POST"){
-    $username = $_POST["username"];
+  if(!ISSET($_SESSION['userIp'])){
+    $_SESSION['userIp'] = getUserIpAddr();
+  }
+  if(!ISSET($_SESSION['userAgent'])){
+    $_SESSION['userAgent'] = getBrowser();
+  }
+  if(!ISSET($_SESSION['attempts'])){
+    $_SESSION['attempts'] = getAttempts($_SESSION['userIp'], $_SESSION['userAgent'], $conn);
+  }
+
+  if(!checkUserLockedOut($_SESSION['userIp'], $_SESSION['userAgent'], $conn)){
+    $_SESSION['locked'] = FALSE;
+  } else {
+    $_SESSION['locked'] = TRUE;
+    header('location: /src/lockedOut.php');
+  }
+
+  if($_SESSION['locked']){
+    header('location: /src/lockedOut.php');
+  } else if($_SERVER["REQUEST_METHOD"] == "POST"){
+    $username = sanitize($_POST["username"]);
     $password = $_POST["password"];
 
-    $result = getUserData($username, $conn);
+    $row = getUserData($username, $conn);
 
-    if($result->num_rows == 0) {
-      $_SESSION['loginErrors'] = 'The username ' . $username . ' and password could not be authenticated at the moment';
-      if(!ISSET($_SESSION['userIp'])){
-        $_SESSION['userIp'] = getUserIpAddr();
-      }
-      if(!ISSET($_SESSION['userAgent'])){
-        $_SESSION['userAgent'] = getBrowser();
-      }
+    if($row == 0) {
+      $_SESSION['loginErrors'] = 'The username ' . $username . ' and password could not be authenticated at the moment<br>';
       insertLog($_SESSION['userIp'], $_SESSION['userAgent'], $username, FALSE, $conn);
+      addAttempt($_SESSION['userIp'], $_SESSION['userAgent'], $conn);
+      $_SESSION['attempts'] = getAttempts($_SESSION['userIp'], $_SESSION['userAgent'], $conn);
+      if($_SESSION['attempts'] >= 5){
+        $_SESSION['locked'] = TRUE;
+        unset($_SESSION['attempts']);
+        lockoutUser($_SESSION['userIp'], $_SESSION['userAgent'], $conn);
+      }
     } else {
       unset($_SESSION['loginErrors']);
-      while ($row = $result->fetch_assoc()) {
-          $thisSalt = $row['salt'];
-          $hashedPassword = md5($password . $thisSalt);
-          $thisPass = $row['password'];
-          if(strcmp($thisPass,$hashedPassword) == 0) {
-              $_SESSION['username'] = $username;
-              if(!ISSET($_SESSION['userIp'])){
-                $_SESSION['userIp'] = getUserIpAddr();
-              }
-              if(!ISSET($_SESSION['userAgent'])){
-                $_SESSION['userAgent'] = getBrowser();
-              }
-              insertLog($_SESSION['userIp'], $_SESSION['userAgent'], $username, TRUE, $conn);
-              if($username == "ADMIN"){
-                $_SESSION['admin'] = TRUE;
-              }
-              exit();
-          } else {
-            $_SESSION['loginErrors'] = 'The username ' . $username . ' and password could not be authenticated at the moment';
-            if(!ISSET($_SESSION['userIp'])){
-              $_SESSION['userIp'] = getUserIpAddr();
-            }
-            if(!ISSET($_SESSION['userAgent'])){
-              $_SESSION['userAgent'] = getBrowser();
-            }
-            insertLog($_SESSION['userIp'], $_SESSION['userAgent'], $username, FALSE, $conn);
+      $thisSalt = $row['salt'];
+      $hashedPassword = md5($password . $thisSalt);
+      $thisPass = $row['password'];
+      if(strcmp($thisPass,$hashedPassword) == 0) {
+          session_regenerate_id();
+          $_SESSION['username'] = $username;
+          $_SESSION['loggedIn'] = TRUE;
+          if($username == "ADMIN"){
+            $_SESSION['admin'] = TRUE;
           }
+          insertLog($_SESSION['userIp'], $_SESSION['userAgent'], $username, TRUE, $conn);
+          exit();
+      } else {
+        $_SESSION['loginErrors'] = 'The username ' . $username . ' and password could not be authenticated at the moment';
+        insertLog($_SESSION['userIp'], $_SESSION['userAgent'], $username, FALSE, $conn);
+        addAttempt($_SESSION['userIp'], $_SESSION['userAgent'], $conn);
+        $_SESSION['attempts'] = getAttempts($_SESSION['userIp'], $_SESSION['userAgent'], $conn);
+        if($_SESSION['attempts'] >= 5){
+          $_SESSION['locked'] = TRUE;
+          unset($_SESSION['attempts']);
+          lockoutUser($_SESSION['userIp'], $_SESSION['userAgent'], $conn);
+        }
       }
-
     }
   }
 ?>

@@ -50,6 +50,19 @@ function createTable(){
   } else {
     echo "Table error: " . $conn -> error;
   }
+  $sql = "CREATE TABLE lockout (
+              id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              ip VARCHAR(20) NOT NULL,
+              userAgent VARCHAR(64) NOT NULL,
+              attempts INT(11) NOT NULL,
+              lockoutTime VARCHAR(32) NOT NULL,
+              locked BOOLEAN NOT NULL
+  )";
+  if($conn->query($sql)){
+    echo "Table created successfully";
+  } else {
+    echo "Table error: " . $conn -> error;
+  }
 }
 
 function generateSalt() {
@@ -89,7 +102,13 @@ function checkUserExists($username, $conn){
 function getUserData($username, $conn){
   $sql = "SELECT * FROM users WHERE username='$username'";
   if($conn->query($sql)){
-    return $conn->query($sql);
+    $result = $conn->query($sql);
+    $count = mysqli_num_rows($result);
+    if($count == 0){
+      return 0;
+    } else {
+      return mysqli_fetch_array($result);
+    }
   } else {
     echo("Query error: " . $conn -> error);
   }
@@ -199,6 +218,136 @@ function insertLog($ip, $userAgent, $username, $successful, $conn){
     header("location: /src/welcome.php");
   } else {
     header("location: /src/login.php");
+  }
+}
+
+function checkActivity($active, $log){
+  if((time() - $active) > 60){
+    header("location: /src/logout.php");
+    exit();
+  } else {
+    $_SESSION['lastActiveTime'] = time();
+  }
+  if((time() - $log) > 3600){
+    header("location: /src/logout.php");
+    exit();
+  }
+}
+
+function sanitize($str){
+  $str = str_replace('&', '&#38', $str);
+	$str = str_replace('<', '&#60', $str);
+	$str = str_replace('>', '&#62', $str);
+	$str = str_replace('"', '&#34', $str);
+	$str = str_replace("'", '&#39', $str);
+	$str = str_replace(';', '&#59', $str);
+	$str = str_replace('/', '&#47', $str);
+  $str = str_replace('\\', '&#92', $str);
+  $str = str_replace('(', '&#40', $str);
+	$str = str_replace(')', '&#41', $str);
+	$str = str_replace('{', '&#123', $str);
+	$str = str_replace('}', '&#125', $str);
+	$str = str_replace('[', '&#91', $str);
+	$str = str_replace(']', '&#93', $str);
+	return $str;
+}
+
+function checkXSS($str){
+  if (strpos($str, '<') !== false) {
+    return FALSE;
+  } else if (strpos($str, '>') !== false) {
+      return FALSE;
+  } else if (strpos($str, ')') !== false) {
+      return FALSE;
+  } else if (strpos($str, '(') !== false) {
+      return FALSE;
+  } else if (strpos($str, '}') !== false) {
+      return FALSE;
+  } else if (strpos($str, '{') !== false) {
+      return FALSE;
+  } else if (strpos($str, ']') !== false) {
+      return FALSE;
+  } else if (strpos($str, '[') !== false) {
+      return FALSE;
+  } else if (strpos($str, '/') !== false) {
+      return FALSE;
+  } else if (strpos($str, '"') !== false) {
+      return FALSE;
+  } else if (strpos($str, "'") !== false) {
+      return FALSE;
+  } else if (strpos($str, ';') !== false) {
+      return FALSE;
+  } else{
+      return TRUE;
+  }
+}
+
+function addAttempt($ip, $userAgent, $conn){
+  $sql = "SELECT * FROM lockout WHERE ip = '$ip' AND userAgent = '$userAgent'";
+  $result = $conn->query($sql);
+  $count = mysqli_num_rows($result);
+  if($count == 0) {
+      $sql = "INSERT INTO lockout (ip, userAgent, attempts)
+      VALUES ('$ip','$userAgent',1)";
+      if ($conn->query($sql) == FALSE) {
+          echo "Error inserting attempts: " . $conn->error;
+      }
+  } else {
+      $sql = "UPDATE lockout SET attempts = attempts + 1 WHERE ip = '$ip' AND userAgent = '$userAgent'";
+      if ($conn->query($sql) == FALSE) {
+          echo "Error updating attempts: " . $conn->error;
+      }
+  }
+}
+
+function getAttempts($ip, $userAgent, $conn){
+  $sql = "SELECT attempts FROM lockout WHERE ip = '$ip' AND userAgent = '$userAgent'";
+  $result = $conn->query($sql);
+  $count = mysqli_num_rows($result);
+  if($count == 0) {
+    $sql = "INSERT INTO lockout (ip, userAgent, attempts)
+    VALUES ('$ip','$userAgent',0)";
+    if ($conn->query($sql) == FALSE) {
+        echo "Error inserting attempts: " . $conn->error;
+    }
+    return 0;
+  } else {
+    $row = mysqli_fetch_array($result);
+    return $row['attempts'];
+  }
+}
+
+function checkUserLockedOut($ip, $userAgent, $conn){
+  $sql = "SELECT * FROM lockout WHERE ip = '$ip' AND userAgent = '$userAgent'";
+  $result = $conn->query($sql);
+  $count = mysqli_num_rows($result);
+  if($count == 0) {
+      return FALSE;
+  } else {
+    $row = mysqli_fetch_array($result);
+    $locked = $row['locked'];
+    $lockoutTime = $row['lockoutTime'];
+    if($locked == 1){
+      if((time() - $lockoutTime) > 180){
+        $sql = "UPDATE lockout SET locked = FALSE, lockoutTime = '0' WHERE ip = '$ip' AND userAgent = '$userAgent'";
+        if ($conn->query($sql) == FALSE) {
+            echo "Error updating locked: " . $conn->error;
+        }
+        return FALSE;
+      } else {
+        return TRUE;
+      }
+    } else {
+      return FALSE;
+    }
+  }
+}
+
+function lockoutUser($ip, $userAgent, $conn){
+  $t = time() + 180;
+  $sql = "UPDATE lockout SET locked = TRUE, attempts = 0, lockoutTime = '$t' WHERE ip = '$ip' AND userAgent = '$userAgent'";
+  if($conn->query($sql) == FALSE) {
+    echo "Error locking user: " . $conn->error;
   }
 }
 

@@ -8,7 +8,7 @@
 		$_SESSION['username'] = null;
 		session_unset() ;
 		session_destroy();
-		header("Location: login.php");
+		header("Location: /src/login.php");
 		exit();
 	}
 ?>

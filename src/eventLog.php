@@ -1,11 +1,14 @@
 <?php
   include("config.php");
+  include("utils.php");
   session_start();
 
-  if(!ISSET($_SESSION['username'])){
-		header("location: /src/login.php");
-		exit();
+  if (!isset($_SESSION['loggedIn'])) {
+		session_destroy();
+    header('location: /src/login.php');
+    exit();
 	}
+
   if(ISSET($_SESSION['admin'])){
     if(!$_SESSION['admin']){
       header("location: /src/welcome.php");
@@ -14,6 +17,13 @@
   } else {
     header("location: /src/welcome.php");
     exit();
+  }
+
+  if(!isset($_SESSION['lastActiveTime'])){
+    $_SESSION['lastActiveTime'] = time();
+    $_SESSION['loggedInTime'] = time();
+  } else {
+    checkActivity($_SESSION['lastActiveTime'], $_SESSION['loggedInTime']);
   }
 ?>
 <!DOCTYPE html>
