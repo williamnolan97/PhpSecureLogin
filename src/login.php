@@ -25,9 +25,7 @@
   } else if($_SERVER["REQUEST_METHOD"] == "POST"){
     $username = sanitize($_POST["username"]);
     $password = $_POST["password"];
-
     $row = getUserData($username, $conn);
-
     if($row == 0) {
       $_SESSION['loginErrors'] = 'The username ' . $username . ' and password could not be authenticated at the moment<br>';
       insertLog($_SESSION['userIp'], $_SESSION['userAgent'], $username, FALSE, $conn);
@@ -51,6 +49,8 @@
             $_SESSION['admin'] = TRUE;
           }
           insertLog($_SESSION['userIp'], $_SESSION['userAgent'], $username, TRUE, $conn);
+          unset($_SESSION['attempts']);
+          resetAttempts($_SESSION['userIp'], $_SESSION['userAgent'], $conn);
           exit();
       } else {
         $_SESSION['loginErrors'] = 'The username ' . $username . ' and password could not be authenticated at the moment';
@@ -72,8 +72,10 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Login</title>
+    <link rel="stylesheet" href="app.css">
 	</head>
 	<body>
+    <?php include("menu.php"); ?>
 		<h1>Login</h1>
     <?php if(ISSET($_SESSION['loginErrors'])) { echo $_SESSION['loginErrors']; } ?>
     <form method = "POST">

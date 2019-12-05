@@ -21,8 +21,10 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Page Two</title>
+    <link rel="stylesheet" href="app.css">
 	</head>
 	<body>
+    <?php include("menu.php"); ?>
       <h1>Hidden Page Two</h1>
       <a href="/src/welcome.php">Welcome</a><br>
 	</body>

@@ -35,8 +35,10 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Sign Up</title>
+    <link rel="stylesheet" href="app.css">
 	</head>
 	<body>
+    <?php include("menu.php"); ?>
     <h1>Sign Up</h1>
     <?php if(ISSET($_SESSION['signUpErrors'])) { echo $_SESSION['signUpErrors']; } ?>
 		<form method="POST">

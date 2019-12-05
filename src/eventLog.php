@@ -31,13 +31,10 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Event Log</title>
-    <style>
-      table, th, td {
-          border: 1px solid black;
-      }
-    </style>
+    <link rel="stylesheet" href="app.css">
 	</head>
 	<body>
+      <?php include("menu.php"); ?>
       <h1>Event Log</h1>
       <a href="/src/Welcome.php">Home</a><br>
       <h3>Login Logs</h3>

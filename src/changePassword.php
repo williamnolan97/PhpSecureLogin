@@ -30,8 +30,7 @@
           exit();
         }
         unset($_SESSION['errors']);
-  			$result = getUserData($username, $conn);
-  			$row = $result->fetch_assoc();
+  			$row = getUserData($username, $conn);
   			$oldSalt = $row['salt'];
         $inputHashedPassword = md5($old . $oldSalt);
   			$oldHashedPassword = $row['password'];
@@ -59,7 +58,7 @@
   							$_SESSION['username'] = null ;
   							session_unset();
   							session_destroy();
-  							//header("location: /src/login.php");
+  							header("location: /src/login.php");
   							exit();
   					}
   			}
@@ -72,8 +71,10 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Change Password </title>
+		<link rel="stylesheet" href="app.css">
 	</head>
 	<body>
+		<?php include("menu.php"); ?>
 		<h1>Change Password </h1>
     <?php if(ISSET($_SESSION['errors'])) { echo $_SESSION['errors']; } ?>
 			<form method = "GET">

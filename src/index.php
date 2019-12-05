@@ -2,7 +2,7 @@
   include("utils.php");
   session_start();
   $_SESSION['userIp'] = getUserIpAddr();
-  $_SESSION['userAgent'] = getBrowser();  
+  $_SESSION['userAgent'] = getBrowser();
   createDb();
   createTable();
 ?>
@@ -12,8 +12,10 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Secure Application</title>
+    <link rel="stylesheet" href="app.css">
 	</head>
 	<body>
+      <?php include("menu.php"); ?>
       <h1>Welcome to my Secure App Login Assignment<br><br>
         Please <a href="/src/login.php">Login</a> or <a href="/src/signUp.php">Sign Up</a> to continue.
       </h1>

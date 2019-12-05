@@ -79,7 +79,7 @@ function insertUser($username, $password, $salt, $conn){
   $sql = "INSERT INTO users (id, username, password, salt)
           VALUES (NULL, '$username', '$password', '$salt')";
   if($conn->query($sql)){
-    echo "User " . $username . " added. <a href='/src/login.php'>Login</a>";
+    header("location: /src/login.php");
     exit();
   } else {
     echo("User insert error: " . $conn -> error);
@@ -328,7 +328,7 @@ function checkUserLockedOut($ip, $userAgent, $conn){
     $locked = $row['locked'];
     $lockoutTime = $row['lockoutTime'];
     if($locked == 1){
-      if((time() - $lockoutTime) > 180){
+      if((time() - $lockoutTime) >= 180){
         $sql = "UPDATE lockout SET locked = FALSE, lockoutTime = '0' WHERE ip = '$ip' AND userAgent = '$userAgent'";
         if ($conn->query($sql) == FALSE) {
             echo "Error updating locked: " . $conn->error;
@@ -344,8 +344,15 @@ function checkUserLockedOut($ip, $userAgent, $conn){
 }
 
 function lockoutUser($ip, $userAgent, $conn){
-  $t = time() + 180;
+  $t = time();
   $sql = "UPDATE lockout SET locked = TRUE, attempts = 0, lockoutTime = '$t' WHERE ip = '$ip' AND userAgent = '$userAgent'";
+  if($conn->query($sql) == FALSE) {
+    echo "Error locking user: " . $conn->error;
+  }
+}
+
+function resetAttempts($ip, $userAgent, $conn){
+  $sql = "UPDATE lockout SET attempts = 0 WHERE ip = '$ip' AND userAgent = '$userAgent'";
   if($conn->query($sql) == FALSE) {
     echo "Error locking user: " . $conn->error;
   }

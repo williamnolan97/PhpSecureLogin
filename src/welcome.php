@@ -24,8 +24,10 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Welcome</title>
+    <link rel="stylesheet" href="app.css">
 	</head>
 	<body>
+    <?php include("menu.php"); ?>
       <h1>Welcome, <?php echo $_SESSION['username']; ?>!</h1>
       <a href="/src/logout.php">Logout</a><br>
       <a href="/src/changePassword.php">Change Password</a><br>
