@@ -14,8 +14,8 @@ function createTable(){
   include("config.php");
   $sql = "CREATE TABLE users (
               id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-              username VARCHAR(30) NOT NULL,
-              password VARCHAR(64) NOT NULL,
+              username VARCHAR(64) NOT NULL,
+              password VARCHAR(128) NOT NULL,
               salt VARCHAR(64) NOT NULL
   )";
   if($conn->query($sql)){
@@ -41,7 +41,7 @@ function createTable(){
               id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
               ip VARCHAR(20) NOT NULL,
               userAgent VARCHAR(64) NOT NULL,
-              username VARCHAR(30) NOT NULL,
+              username VARCHAR(64) NOT NULL,
               successful BOOLEAN NOT NULL
   )";
   if($conn->query($sql)){
